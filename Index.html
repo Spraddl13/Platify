@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hantel-Rechner</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary: #2b2d42;
+            --accent: #ef233c;
+            --text: #333333;
+            --bar-color: #bdc3c7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text); padding-bottom: 2rem; }
+
+        header { background-color: var(--primary); color: white; padding: 1.5rem; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 1rem; }
+
+        /* Tabs */
+        .tabs { display: flex; margin-bottom: 1rem; background: var(--card-bg); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .tab { flex: 1; text-align: center; padding: 1rem; cursor: pointer; font-weight: bold; background: #e9ecef; color: #6c757d; transition: 0.3s; }
+        .tab.active { background: var(--card-bg); color: var(--primary); border-bottom: 3px solid var(--accent); }
+
+        .card { background: var(--card-bg); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .section-title { font-size: 1.1rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 2px solid var(--bg-color); padding-bottom: 0.5rem; }
+
+        /* Barbell Selector */
+        .bar-selector { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .bar-btn { flex: 1; padding: 0.8rem 0; border: 2px solid var(--bar-color); background: transparent; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .bar-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Mode 1: Plate Buttons */
+        .plate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 0.5rem; margin-bottom: 1rem; }
+        .plate-btn { 
+            border: none; border-radius: 50%; width: 60px; height: 60px; margin: 0 auto;
+            color: white; font-weight: bold; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: transform 0.1s;
+        }
+        .plate-btn:active { transform: scale(0.95); }
+        .plate-btn.small { width: 45px; height: 45px; font-size: 0.8rem; color: #333;}
+        
+        /* Plate Colors */
+        .c-white { background-color: #f8f9fa; border: 2px solid #dee2e6; color: #333 !important; }
+        .c-yellow { background-color: #ffd700; color: #333 !important; }
+        .c-red { background-color: #dc3545; }
+        .c-grey { background-color: #6c757d; }
+        .c-green { background-color: #28a745; }
+        .c-blue { background-color: #007bff; }
+
+        .controls { display: flex; gap: 1rem; margin-top: 1rem; }
+        .btn-clear { background: #e0e0e0; border: none; padding: 0.8rem; border-radius: 6px; font-weight: bold; flex: 1; cursor: pointer; }
+        .btn-calc { background: var(--accent); color: white; border: none; padding: 0.8rem; border-radius: 6px; font-weight: bold; flex: 1; cursor: pointer; }
+
+        /* Mode 2: Input */
+        .target-input-group { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .target-input-group input { flex: 1; padding: 1rem; font-size: 1.2rem; border: 2px solid #ccc; border-radius: 6px; text-align: center; }
+
+        /* Result Display */
+        .result-box { text-align: center; margin: 1.5rem 0; }
+        .result-weight { font-size: 3rem; font-weight: bold; color: var(--primary); }
+        .result-label { font-size: 1rem; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Barbell Visualizer */
+        .visualizer { display: flex; align-items: center; justify-content: center; height: 120px; background: #e9ecef; border-radius: 8px; overflow: hidden; padding: 0 10px; }
+        .sleeve { display: flex; align-items: center; height: 100%; }
+        .sleeve.left { flex-direction: row-reverse; justify-content: flex-start; }
+        .sleeve.right { flex-direction: row; justify-content: flex-start; }
+        
+        .shaft { width: 100px; height: 16px; background: repeating-linear-gradient(90deg, #95a5a6, #95a5a6 2px, #7f8c8d 2px, #7f8c8d 4px); z-index: 1; }
+        .collar { width: 15px; height: 35px; background: #7f8c8d; border-radius: 2px; z-index: 2; }
+        
+        .plate-vis { border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); margin: 0 1px; z-index: 3; box-shadow: inset -2px 0 5px rgba(0,0,0,0.1); }
+        .vis-large { height: 90px; }
+        .vis-small { height: 45px; }
+
+        .hidden { display: none !important; }
+        .error-msg { color: var(--accent); text-align: center; margin-top: 0.5rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Hantel-Rechner</h1>
+    <p id="sub-title">Zusammenklicken & Gewicht berechnen</p>
+</header>
+
+<div class="container">
+    <div class="tabs">
+        <div class="tab active" id="tab-build" onclick="switchMode('build')">Klicken</div>
+        <div class="tab" id="tab-calc" onclick="switchMode('calc')">Berechnen</div>
+    </div>
+
+    <!-- Barbell Selector -->
+    <div class="card">
+        <div class="section-title">Stange wählen</div>
+        <div class="bar-selector">
+            <button class="bar-btn" onclick="selectBar(7.5)">7.5 kg</button>
+            <button class="bar-btn" onclick="selectBar(10)">10 kg</button>
+            <button class="bar-btn" onclick="selectBar(15)">15 kg</button>
+            <button class="bar-btn active" onclick="selectBar(20)">20 kg</button>
+        </div>
+    </div>
+
+    <!-- Mode 1: Build -->
+    <div id="mode-build" class="card">
+        <div class="section-title">Scheiben hinzufügen (Paarweise)</div>
+        
+        <p style="font-size:0.8rem; margin-bottom:5px; color:#666;">Große Scheiben</p>
+        <div class="plate-grid">
+            <button class="plate-btn c-blue" onclick="addPlate(20)">20</button>
+            <button class="plate-btn c-yellow" onclick="addPlate(15)">15</button>
+            <button class="plate-btn c-green" onclick="addPlate(10)">10</button>
+            <button class="plate-btn c-grey" onclick="addPlate(5)">5</button>
+        </div>
+
+        <p style="font-size:0.8rem; margin-bottom:5px; color:#666;">Kleine Scheiben</p>
+        <div class="plate-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <button class="plate-btn small c-red" onclick="addPlate(2.5)">2.5</button>
+            <button class="plate-btn small c-yellow" onclick="addPlate(1.5)">1.5</button>
+            <button class="plate-btn small c-white" onclick="addPlate(0.5)">0.5</button>
+        </div>
+
+        <div class="controls">
+            <button class="btn-clear" onclick="clearPlates()">Löschen</button>
+        </div>
+    </div>
+
+    <!-- Mode 2: Calculate -->
+    <div id="mode-calc" class="card hidden">
+        <div class="section-title">Zielgewicht eingeben</div>
+        <div class="target-input-group">
+            <input type="number" id="target-weight" placeholder="z.B. 80" step="1" inputmode="decimal">
+            <button class="btn-calc" onclick="calculatePlates()">Berechnen</button>
+        </div>
+        <div id="calc-error" class="error-msg"></div>
+    </div>
+
+    <!-- Visualization & Result -->
+    <div class="card">
+        <div class="result-box">
+            <div class="result-weight" id="total-display">20 kg</div>
+            <div class="result-label">Gesamtgewicht</div>
+        </div>
+
+        <div class="visualizer" id="visualizer">
+            <div class="sleeve left" id="sleeve-left"></div>
+            <div class="collar"></div>
+            <div class="shaft"></div>
+            <div class="collar"></div>
+            <div class="sleeve right" id="sleeve-right"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Plate Definitions
+    const PLATES = [
+        { weight: 20, class: 'c-blue', sizeClass: 'vis-large', width: 24 },
+        { weight: 15, class: 'c-yellow', sizeClass: 'vis-large', width: 18 },
+        { weight: 10, class: 'c-green', sizeClass: 'vis-large', width: 14 },
+        { weight: 5, class: 'c-grey', sizeClass: 'vis-large', width: 10 },
+        { weight: 2.5, class: 'c-red', sizeClass: 'vis-small', width: 12 },
+        { weight: 1.5, class: 'c-yellow', sizeClass: 'vis-small', width: 10 },
+        { weight: 0.5, class: 'c-white', sizeClass: 'vis-small', width: 8 }
+    ];
+
+    let currentMode = 'build'; // 'build' or 'calc'
+    let barWeight = 20;
+    let loadedPlates = []; // Array of plate objects
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.getElementById('tab-build').classList.toggle('active', mode === 'build');
+        document.getElementById('tab-calc').classList.toggle('active', mode === 'calc');
+        
+        document.getElementById('mode-build').classList.toggle('hidden', mode === 'calc');
+        document.getElementById('mode-calc').classList.toggle('hidden', mode === 'build');
+        
+        document.getElementById('sub-title').innerText = mode === 'build' ? 'Zusammenklicken & Gewicht berechnen' : 'Zielgewicht eingeben & Scheiben finden';
+        
+        clearPlates();
+    }
+
+    function selectBar(weight) {
+        barWeight = weight;
+        document.querySelectorAll('.bar-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseFloat(btn.innerText) === weight) {
+                btn.classList.add('active');
+            }
+        });
+        if(currentMode === 'calc' && document.getElementById('target-weight').value) {
+            calculatePlates();
+        } else {
+            updateUI();
+        }
+    }
+
+    function addPlate(weight) {
+        const plate = PLATES.find(p => p.weight === weight);
+        if (plate) {
+            loadedPlates.push(plate);
+            updateUI();
+        }
+    }
+
+    function clearPlates() {
+        loadedPlates = [];
+        document.getElementById('calc-error').innerText = '';
+        updateUI();
+    }
+
+    function calculatePlates() {
+        document.getElementById('calc-error').innerText = '';
+        const targetStr = document.getElementById('target-weight').value;
+        if (!targetStr) return;
+        
+        const target = parseFloat(targetStr.replace(',', '.'));
+        
+        if (target < barWeight) {
+            document.getElementById('calc-error').innerText = "Zielgewicht ist leichter als die Stange!";
+            loadedPlates = [];
+            updateUI();
+            return;
+        }
+
+        let diff = target - barWeight;
+        let sideWeight = diff / 2;
+        let calculated = [];
+
+        // Greedy algorithm for plates
+        for (let p of PLATES) {
+            while (sideWeight >= p.weight) {
+                calculated.push(p);
+                sideWeight -= p.weight;
+                sideWeight = Math.round(sideWeight * 100) / 100; // Fix float precision
+            }
+        }
+
+        if (sideWeight > 0) {
+            document.getElementById('calc-error').innerText = `Exaktes Gewicht nicht möglich. Zeige nächstkleineres Gewicht. (Rest: ${sideWeight*2}kg)`;
+        }
+
+        loadedPlates = calculated;
+        updateUI();
+    }
+
+    function updateUI() {
+        // Calculate Total
+        const platesWeight = loadedPlates.reduce((sum, plate) => sum + (plate.weight * 2), 0);
+        const total = barWeight + platesWeight;
+        
+        // Update Text
+        document.getElementById('total-display').innerText = `${total.toLocaleString('de-DE')} kg`;
+
+        // Update Visualizer
+        const leftSleeve = document.getElementById('sleeve-left');
+        const rightSleeve = document.getElementById('sleeve-right');
+        
+        leftSleeve.innerHTML = '';
+        rightSleeve.innerHTML = '';
+
+        // Draw plates
+        loadedPlates.forEach(plate => {
+            const plateHTML = `<div class="plate-vis ${plate.sizeClass} ${plate.class}" style="width: ${plate.width}px;"></div>`;
+            leftSleeve.innerHTML += plateHTML;
+            rightSleeve.innerHTML += plateHTML;
+        });
+    }
+
+    // Init UI
+    updateUI();
+</script>
+</body>
+</html>
