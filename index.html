@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hantel-Rechner Compact</title>
+    <title>Hantel-Rechner Pro</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
@@ -20,7 +20,7 @@
             background-color: var(--bg-color); 
             color: var(--text); 
             height: 100vh; 
-            overflow: hidden; /* Verhindert das Scrollen */
+            overflow: hidden; /* Verhindert das Scrollen für ein echtes App-Gefühl */
             display: flex;
             flex-direction: column;
         }
@@ -28,70 +28,82 @@
         header { 
             background-color: var(--primary); 
             color: white; 
-            padding: 8px; 
+            padding: 10px; 
             text-align: center; 
             flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
         }
-        h1 { font-size: 1.1rem; }
+        h1 { font-size: 1.2rem; }
 
         .app-content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 8px;
-            gap: 8px;
+            padding: 10px;
+            gap: 10px;
             justify-content: space-between;
         }
 
-        /* Tabs & Bar Combined */
-        .top-row {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
+        /* Tabs */
         .tabs { 
             display: flex; 
             background: #e9ecef; 
-            border-radius: 6px; 
+            border-radius: 8px; 
             overflow: hidden; 
-            flex: 1;
+            flex-shrink: 0;
         }
         .tab { 
             flex: 1; 
             text-align: center; 
-            padding: 8px 4px; 
+            padding: 10px; 
             cursor: pointer; 
             font-weight: 600; 
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: #6c757d; 
+            transition: background 0.2s;
         }
         .tab.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-        .bar-selector { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 4px; 
+        /* Prominentes Dropdown für die Stange */
+        .bar-selector {
             background: white;
-            padding: 4px;
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .bar-selector label {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        select#bar-select {
+            flex: 1;
+            padding: 10px;
+            font-size: 1rem;
+            border: 2px solid #e9ecef;
             border-radius: 6px;
+            background-color: #f8f9fa;
+            color: var(--text);
+            font-weight: bold;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231a1c2c%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat, repeat;
+            background-position: right .7em top 50%, 0 0;
+            background-size: .65em auto, 100%;
+            cursor: pointer;
         }
-        .bar-btn { 
-            padding: 6px 0; 
-            border: 1px solid var(--bar-color); 
-            background: transparent; 
-            border-radius: 4px; 
-            font-size: 0.75rem; 
-            font-weight: bold; 
-            cursor: pointer; 
-        }
-        .bar-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Mode Section */
+        /* Modus Bereich */
         .mode-container {
             background: white;
             border-radius: 8px;
-            padding: 10px;
+            padding: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             flex-grow: 0;
         }
@@ -99,7 +111,7 @@
         .plate-grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            gap: 6px; 
+            gap: 8px; 
         }
         .plate-btn { 
             border: none; 
@@ -111,91 +123,140 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 0.85rem; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 0.9rem; 
+            box-shadow: 0 3px 5px rgba(0,0,0,0.15);
+            transition: transform 0.1s;
         }
+        .plate-btn:active { transform: scale(0.95); }
         .plate-btn.small { 
             transform: scale(0.85);
             color: #333;
         }
+        .plate-btn.small:active { transform: scale(0.8); }
         
-        .c-white { background: #fff; border: 1px solid #ccc; color: #333 !important; }
+        .c-white { background: #fff; border: 2px solid #ccc; color: #333 !important; }
         .c-yellow { background: #ffcc00; color: #333 !important; }
         .c-red { background: #e63946; }
         .c-grey { background: #6d6d6d; }
         .c-green { background: #2a9d8f; }
         .c-blue { background: #0077b6; }
 
-        /* Calc Input */
+        /* Rechner Eingabe */
         .calc-input {
             display: flex;
             gap: 8px;
         }
         .calc-input input {
             flex: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
+            padding: 10px;
+            border: 2px solid #e9ecef;
             border-radius: 6px;
-            font-size: 1rem;
+            font-size: 1.2rem;
             text-align: center;
+            font-weight: bold;
         }
         .btn-action {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 6px;
             font-weight: bold;
+            font-size: 1.1rem;
             cursor: pointer;
         }
 
-        /* Result Area */
+        /* Ergebnis Bereich */
         .result-area {
             text-align: center;
             background: white;
             border-radius: 8px;
-            padding: 10px;
+            padding: 15px 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .total-weight { font-size: 2.2rem; font-weight: 800; line-height: 1; margin-bottom: 2px;}
-        .label { font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 10px; }
+        .total-weight { font-size: 2.8rem; font-weight: 800; line-height: 1; margin-bottom: 2px; color: var(--primary);}
+        .label { font-size: 0.8rem; color: #888; text-transform: uppercase; margin-bottom: 15px; font-weight: bold; }
 
-        /* Visualizer */
+        /* --- NEUER VERGRÖSSERTER VISUALIZER --- */
         .visualizer { 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            height: 80px; 
+            height: 120px; /* Deutlich höher */
             background: #f8f9fa; 
             border-radius: 6px; 
-            padding: 0 5px;
-            position: relative;
+            padding: 0;
+            overflow: hidden;
         }
-        .sleeve { display: flex; align-items: center; height: 100%; position: relative; }
-        .sleeve.left { flex-direction: row-reverse; }
-        .sleeve.right { flex-direction: row; }
         
-        .shaft { width: 60px; height: 10px; background: #999; z-index: 1; }
-        .collar { width: 10px; height: 24px; background: #777; border-radius: 1px; z-index: 2; }
-        
-        .plate-vis { 
-            border-radius: 2px; 
-            border: 1px solid rgba(0,0,0,0.1); 
-            margin: 0 1px; 
-            z-index: 3; 
-            cursor: pointer;
-            transition: transform 0.1s;
+        /* Die Scheibenaufnahme (Sleeve) als sichtbares Element */
+        .sleeve-wrapper {
             position: relative;
+            width: 110px; /* Länge der Aufnahme */
+            height: 100px;
+            display: flex;
+            align-items: center;
         }
-        .plate-vis:active { transform: scale(0.9); opacity: 0.7; }
-        .vis-large { height: 64px; }
-        .vis-small { height: 32px; }
+        .sleeve-wrapper.left { justify-content: flex-end; }
+        .sleeve-wrapper.right { justify-content: flex-start; }
 
-        .hint { font-size: 0.65rem; color: #aaa; margin-top: 4px; }
+        /* Die geriffelte Metallstange darunter */
+        .sleeve-bar {
+            position: absolute;
+            width: 100%;
+            height: 16px; 
+            background: linear-gradient(to bottom, #d5d8dc 0%, #95a5a6 50%, #d5d8dc 100%);
+            z-index: 1;
+            border-top: 1px solid #7f8c8d;
+            border-bottom: 1px solid #7f8c8d;
+        }
+        .sleeve-wrapper.left .sleeve-bar { right: 0; border-radius: 3px 0 0 3px; }
+        .sleeve-wrapper.right .sleeve-bar { left: 0; border-radius: 0 3px 3px 0; }
+
+        /* Der Container für die Hantelscheiben (liegt über der Metallstange) */
+        .plate-stack {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            z-index: 3;
+            position: relative;
+        }
+        .plate-stack.left { flex-direction: row-reverse; }
+
+        /* Griffstück und innerer Kragen */
+        .shaft { 
+            width: 50px; 
+            height: 18px; 
+            background: repeating-linear-gradient(90deg, #95a5a6, #95a5a6 2px, #7f8c8d 2px, #7f8c8d 4px); 
+            z-index: 1; 
+        }
+        .collar { 
+            width: 14px; 
+            height: 45px; 
+            background: #7f8c8d; 
+            border-radius: 2px; 
+            z-index: 2; 
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        /* Die vergrößerten Scheiben in der Ansicht */
+        .plate-vis { 
+            border-radius: 4px; 
+            border: 1px solid rgba(0,0,0,0.2); 
+            margin: 0 1px; 
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.1s;
+        }
+        .plate-vis:active { transform: scale(0.95); filter: brightness(0.8); }
+        .vis-large { height: 90px; box-shadow: inset -2px 0 5px rgba(0,0,0,0.2); }
+        .vis-small { height: 45px; box-shadow: inset -1px 0 3px rgba(0,0,0,0.2); }
+
+        .hint { font-size: 0.75rem; color: #888; margin-top: 8px; font-weight: bold;}
         .hidden { display: none !important; }
-        .error { color: var(--accent); font-size: 0.75rem; margin-top: 4px; height: 12px;}
+        .error { color: var(--accent); font-size: 0.8rem; margin-top: 5px; height: 14px; font-weight: bold;}
 
     </style>
 </head>
@@ -206,19 +267,25 @@
 </header>
 
 <div class="app-content">
-    <div class="top-row">
-        <div class="tabs">
-            <div class="tab active" id="tab-build" onclick="switchMode('build')">Klick</div>
-            <div class="tab" id="tab-calc" onclick="switchMode('calc')">Rechner</div>
-        </div>
-        <div class="bar-selector">
-            <button class="bar-btn" onclick="selectBar(7.5)">7.5</button>
-            <button class="bar-btn" onclick="selectBar(10)">10</button>
-            <button class="bar-btn" onclick="selectBar(15)">15</button>
-            <button class="bar-btn active" onclick="selectBar(20)">20</button>
-        </div>
+    
+    <!-- Tab Navigation -->
+    <div class="tabs">
+        <div class="tab active" id="tab-build" onclick="switchMode('build')">Selbst Klicken</div>
+        <div class="tab" id="tab-calc" onclick="switchMode('calc')">Gewicht Berechnen</div>
     </div>
 
+    <!-- Prominentes Dropdown -->
+    <div class="bar-selector">
+        <label for="bar-select">Stange:</label>
+        <select id="bar-select" onchange="selectBar(parseFloat(this.value))">
+            <option value="20">20 kg (Standard Men's)</option>
+            <option value="15">15 kg (Standard Women's)</option>
+            <option value="10">10 kg (Technik/Junior)</option>
+            <option value="7.5">7.5 kg (Trainingsstange)</option>
+        </select>
+    </div>
+
+    <!-- Modus 1: Klicken -->
     <div id="mode-build" class="mode-container">
         <div class="plate-grid">
             <button class="plate-btn c-blue" onclick="addPlate(20)">20</button>
@@ -228,47 +295,60 @@
             <button class="plate-btn small c-red" onclick="addPlate(2.5)">2.5</button>
             <button class="plate-btn small c-yellow" onclick="addPlate(1.5)">1.5</button>
             <button class="plate-btn small c-white" onclick="addPlate(0.5)">0.5</button>
-            <button class="plate-btn" style="background:#ddd; color:#333; font-size:0.7rem;" onclick="clearPlates()">RESET</button>
+            <button class="plate-btn" style="background:#e0e0e0; color:#333; font-size:0.75rem;" onclick="clearPlates()">RESET</button>
         </div>
     </div>
 
+    <!-- Modus 2: Berechnen -->
     <div id="mode-calc" class="mode-container hidden">
         <div class="calc-input">
-            <input type="number" id="target-weight" placeholder="Gewicht (kg)" inputmode="decimal">
+            <input type="number" id="target-weight" placeholder="Zielgewicht (kg)" inputmode="decimal">
             <button class="btn-action" onclick="calculatePlates()">GO</button>
         </div>
         <div id="calc-error" class="error"></div>
     </div>
 
+    <!-- Ergebnis & Visualisierung -->
     <div class="result-area">
         <div class="total-weight" id="total-display">20 kg</div>
         <div class="label">Gesamtgewicht</div>
 
         <div class="visualizer">
-            <div class="sleeve left" id="sleeve-left"></div>
+            <!-- Linke Hantelaufnahme (Sleeve) -->
+            <div class="sleeve-wrapper left">
+                <div class="sleeve-bar"></div>
+                <div class="plate-stack left" id="sleeve-left"></div>
+            </div>
+            
             <div class="collar"></div>
             <div class="shaft"></div>
             <div class="collar"></div>
-            <div class="sleeve right" id="sleeve-right"></div>
+            
+            <!-- Rechte Hantelaufnahme (Sleeve) -->
+            <div class="sleeve-wrapper right">
+                <div class="sleeve-bar"></div>
+                <div class="plate-stack right" id="sleeve-right"></div>
+            </div>
         </div>
-        <div class="hint">Tippe auf eine Scheibe zum Entfernen</div>
+        <div class="hint">Tippe auf eine große Scheibe zum Entfernen</div>
     </div>
 </div>
 
 <script>
+    // Die Breiten (width) wurden vergrößert, damit man sie mit dem Finger besser trifft
     const PLATES = [
-        { weight: 20, class: 'c-blue', sizeClass: 'vis-large', width: 14 },
-        { weight: 15, class: 'c-yellow', sizeClass: 'vis-large', width: 12 },
-        { weight: 10, class: 'c-green', sizeClass: 'vis-large', width: 10 },
-        { weight: 5, class: 'c-grey', sizeClass: 'vis-large', width: 8 },
-        { weight: 2.5, class: 'c-red', sizeClass: 'vis-small', width: 10 },
-        { weight: 1.5, class: 'c-yellow', sizeClass: 'vis-small', width: 8 },
-        { weight: 0.5, class: 'c-white', sizeClass: 'vis-small', width: 6 }
+        { weight: 20, class: 'c-blue', sizeClass: 'vis-large', width: 22 },
+        { weight: 15, class: 'c-yellow', sizeClass: 'vis-large', width: 18 },
+        { weight: 10, class: 'c-green', sizeClass: 'vis-large', width: 14 },
+        { weight: 5, class: 'c-grey', sizeClass: 'vis-large', width: 10 },
+        { weight: 2.5, class: 'c-red', sizeClass: 'vis-small', width: 14 },
+        { weight: 1.5, class: 'c-yellow', sizeClass: 'vis-small', width: 12 },
+        { weight: 0.5, class: 'c-white', sizeClass: 'vis-small', width: 10 }
     ];
 
     let currentMode = 'build';
     let barWeight = 20;
-    let loadedPlates = []; // Array mit den aufgeladenen Scheiben
+    let loadedPlates = [];
 
     function switchMode(mode) {
         currentMode = mode;
@@ -281,10 +361,7 @@
 
     function selectBar(weight) {
         barWeight = weight;
-        document.querySelectorAll('.bar-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (parseFloat(btn.innerText) === weight) btn.classList.add('active');
-        });
+        document.getElementById('bar-select').value = weight; // Synchronisiert das Dropdown
         if(currentMode === 'calc') calculatePlates();
         else updateUI();
     }
@@ -297,7 +374,6 @@
         }
     }
 
-    // NEU: Funktion zum Entfernen einer bestimmten Scheibe
     function removePlate(index) {
         loadedPlates.splice(index, 1);
         updateUI();
@@ -317,7 +393,7 @@
         
         const target = parseFloat(targetStr.replace(',', '.'));
         if (target < barWeight) {
-            err.innerText = "Zu leicht!";
+            err.innerText = "Das Zielgewicht ist leichter als die Stange!";
             loadedPlates = [];
             updateUI();
             return;
@@ -334,7 +410,7 @@
             }
         }
 
-        if (sideWeight > 0) err.innerText = `Rest: ${sideWeight*2}kg`;
+        if (sideWeight > 0) err.innerText = `Exaktes Gewicht nicht möglich. Rest: ${sideWeight*2}kg`;
         loadedPlates = calculated;
         updateUI();
     }
@@ -342,32 +418,34 @@
     function updateUI() {
         const platesWeight = loadedPlates.reduce((sum, p) => sum + (p.weight * 2), 0);
         const total = barWeight + platesWeight;
+        
+        // Gesamtgewicht updaten
         document.getElementById('total-display').innerText = `${total.toLocaleString('de-DE')} kg`;
 
-        const leftSleeve = document.getElementById('sleeve-left');
-        const rightSleeve = document.getElementById('sleeve-right');
+        const leftStack = document.getElementById('sleeve-left');
+        const rightStack = document.getElementById('sleeve-right');
         
-        leftSleeve.innerHTML = '';
-        rightSleeve.innerHTML = '';
+        leftStack.innerHTML = '';
+        rightStack.innerHTML = '';
 
-        // DOM Elemente für die Visualisierung erstellen, damit wir einen Klick-Event anhängen können
         loadedPlates.forEach((plate, index) => {
-            // Linke Seite
+            // Linke Scheibe
             const pLeft = document.createElement('div');
             pLeft.className = `plate-vis ${plate.sizeClass} ${plate.class}`;
             pLeft.style.width = plate.width + 'px';
-            pLeft.onclick = () => removePlate(index); // Klick entfernt das Paar
-            leftSleeve.appendChild(pLeft);
+            pLeft.onclick = () => removePlate(index);
+            leftStack.appendChild(pLeft);
 
-            // Rechte Seite
+            // Rechte Scheibe
             const pRight = document.createElement('div');
             pRight.className = `plate-vis ${plate.sizeClass} ${plate.class}`;
             pRight.style.width = plate.width + 'px';
-            pRight.onclick = () => removePlate(index); // Klick entfernt das Paar
-            rightSleeve.appendChild(pRight);
+            pRight.onclick = () => removePlate(index);
+            rightStack.appendChild(pRight);
         });
     }
 
+    // Init
     updateUI();
 </script>
 </body>
